@@ -2774,7 +2774,7 @@ class ViewClient:
     @staticmethod
     def connectToDeviceOrExit(timeout=60, verbose=False, ignoresecuredevice=False, ignoreversioncheck=False,
                               serialno=None, adbhostname=adbclient.HOSTNAME, adbport=adbclient.PORT,
-                              connect=adbclient.connect):
+                              connect=adbclient.connect, **kwargs):
         """
         Connects to a device which serial number is obtained from the script arguments if available
         or using the default regex C{.*}.
@@ -2860,6 +2860,10 @@ class ViewClient:
             serialno = ViewClient.__obtainDeviceSerialNumber(device)
         if verbose:
             print('Actual device serialno=%s' % serialno, file=sys.stderr)
+        for key in list(kwargs.keys()):
+            if not hasattr(device, key):
+                raise ValueError('Unknown %s option' % key)
+            setattr(device, key, kwargs.pop(key))
         return device, serialno
 
     @staticmethod
