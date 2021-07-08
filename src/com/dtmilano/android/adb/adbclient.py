@@ -198,7 +198,7 @@ class AdbClient:
     DOWN_AND_UP = DOWN_AND_UP
 
     def __init__(self, serialno=None, hostname=HOSTNAME, port=PORT, settransport=True, reconnect=True,
-                 ignoreversioncheck=False, timeout=TIMEOUT, connect=connect):
+                 ignoreversioncheck=False, timeout=TIMEOUT, connect=connect, su=False):
         self.Log = AdbClient.__Log(self)
 
         self.serialno = serialno
@@ -208,6 +208,7 @@ class AdbClient:
         self.__connect = connect
         self.timerId = -1
         self.timers = {}
+        self.su = su
 
         self.reconnect = reconnect
         self.socket = connect(self.hostname, self.port, self.timeout)
@@ -515,6 +516,8 @@ class AdbClient:
         return devices
 
     def shell(self, _cmd=None, _convertOutputToString=True):
+        if self.su and not _cmd.startswith('su -c'):
+            return self.shell('su -c %s' % _cmd)
         if DEBUG:
             print("shell(_cmd=%s)" % _cmd, file=sys.stderr)
         self.__checkTransport()
